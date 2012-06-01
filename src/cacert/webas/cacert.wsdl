@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions name="cacertApplicationServer"
+             targetNamespace="http://cacert"
+             xmlns:tns="http://cacert"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+	<types>
+		<xsd:schema elementFormDefault="qualified"
+			targetNamespace="http://cacert">
+    
+    		<!--
+    			DTOs
+    		-->    
+	  
+			<!-- Certificate DTO -->  
+			<xsd:complexType name="certificateType">
+				<xsd:sequence>
+					<xsd:element name="serial" type="xsd:long" />
+					<xsd:element name="subject" type="xsd:string" />	
+					<xsd:element name="signatureAlgorithm" type="xsd:string" />		
+					<xsd:element name="signature" type="xsd:string" />
+					<xsd:element name="issuer" type="xsd:string" />
+					<xsd:element name="validFrom" type="xsd:long" />
+					<xsd:element name="validTo" type="xsd:long" />
+					<xsd:element name="keyUsage" type="xsd:string" />
+					<xsd:element name="publicKey" type="xsd:string" />
+					<xsd:element name="thumbPrintAlgorithm" type="xsd:string" />
+					<xsd:element name="thumbPrint" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="certificate1" type="tns:certificateType" />
+			<xsd:element name="certificate2" type="tns:certificateType" />
+
+			<!-- Sign Certificate DTO -->
+			<xsd:complexType name="signCertificateType">
+				<xsd:sequence>
+					<xsd:element name="entityName" type="xsd:string" />
+					<xsd:element name="publicKey" type="xsd:string" />			
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="signCertificate" type="tns:signCertificateType" />
+			
+			<!-- Block Certificate DTO -->  
+			<xsd:complexType name="blockCertificateType">
+			<xsd:sequence>
+				<xsd:element name="oldSerial" type="xsd:long" />
+				<xsd:element name="entityName" type="xsd:string" />
+				<xsd:element name="oldPublicKey" type="xsd:string" />
+				<xsd:element name="newPublicKey" type="xsd:string" />			
+			</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="blockCertificate" type="tns:blockCertificateType" />
+      
+      		<!-- Blocked Serial DTO -->
+			<xsd:complexType name="blockedSerialCertificateType">
+				<xsd:sequence>
+					<xsd:element name="serial" type="xsd:long" />			
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="blockedSerialCertificate" type="tns:blockedSerialCertificateType" />
+			
+			<!-- Certificates List DTO -->
+			<xsd:complexType name="certificateSerialsListType">
+				<xsd:sequence>
+					<xsd:element minOccurs="0" maxOccurs="unbounded" name="SerialsDTOList" type="tns:blockedSerialCertificateType"/>	
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="certificatesSerialsList" type="tns:certificateSerialsListType" /> 
+ 
+			<!-- 
+				EXCEPTIONS 
+			-->
+			
+			<!--  Certificate Exception -->
+			<xsd:complexType name="InvalidCertificateType">
+				<xsd:sequence>
+					<xsd:element name="name" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="CertificateRemoteException" type="tns:InvalidCertificateType" />
+			
+		</xsd:schema>
+	</types>
+
+    <!-- Message definitions
+
+         In document-literal style, each message has a single part
+         that refers to a XML element defined in the XML Schema Definition.
+    -->
+        
+    <!-- Exceptions --> 
+    
+    <message name="CertificateRemoteException">
+    	<part name="reason" element="tns:CertificateRemoteException" />
+    </message>
+    
+    
+	<!--  Sign Certificate -->
+	<message name="SignCertificateRequest">
+		<part name="parameters" element="tns:signCertificate" />
+	</message>
+	
+	<message name="SignCertificateResponse">
+		<part name="result" element="tns:certificate1" />
+	</message>
+
+	<!-- Block Certificate -->
+	<message name="BlockCertificateRequest">
+		<part name="parameters" element="tns:blockCertificate" />
+	</message>
+    
+	<message name="BlockCertificateResponse" >
+		<part name="result" element="tns:certificate2" />
+	</message>
+    
+	<!-- Get Blocked Certificates -->
+	<message name="GetBlockedListRequest" />
+    
+	<message name="GetBlockedListResponse">
+		<part name="result" element="tns:certificatesSerialsList" />
+	</message>    
+
+	<!-- Port type definitions
+
+         A port type is a set of operations. It is similar in concept to a Java interface.
+
+         Each operation has an input message, an output message and, optionally,
+         fault messages.
+    -->
+	<portType name="CacertApplicationServerPortType">
+    
+		<operation name="SignCertificate">
+			<input message="tns:SignCertificateRequest" name="SignCertificateRequest"/>
+			<output message="tns:SignCertificateResponse" name="SignCertificateResponse"/>
+			<fault message="tns:CertificateRemoteException" name="CertificateRemoteException"/>
+		</operation>
+		
+		<operation name="BlockCertificate">
+			<input message="tns:BlockCertificateRequest" name="BlockCertificateRequest"/>
+			<output message="tns:BlockCertificateResponse" name="BlockCertificateResponse"/>
+			<fault message="tns:CertificateRemoteException" name="CertificateRemoteException"/>
+		</operation>
+      
+		<operation name="GetBlockedList">
+			<input message="tns:GetBlockedListRequest" name="GetBlockedListRequest"/>
+			<output message="tns:GetBlockedListResponse" name="GetBlockedListResponse"/>
+		</operation>
+		
+	</portType>
+
+	<binding name="CacertApplicationServerBinding" type="tns:CacertApplicationServerPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+      	
+		<operation name="SignCertificate">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="CertificateRemoteException">
+				<soap:fault use="literal" name="CertificateRemoteException"/>
+			</fault>
+		</operation>
+        
+		<operation name="BlockCertificate">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="CertificateRemoteException">
+				<soap:fault use="literal" name="CertificateRemoteException"/>
+			</fault>
+		</operation>
+        
+		<operation name="GetBlockedList">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+		
+	</binding>
+
+	<service name="cacert">
+		<port name="CacertApplicationServicePort" binding="tns:CacertApplicationServerBinding">
+			<soap:address location="http://localhost:8080/cacert-as/CacertApplicationServer" />
+		</port>
+	</service>
+
+</definitions>

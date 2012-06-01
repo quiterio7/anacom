@@ -1,0 +1,48 @@
+package cacert.domain;
+
+/*
+ * Classes
+ */
+
+class CAManager
+{
+	String privateKey;
+	String publicKey;
+	long currentSerial;
+	long validPeriod;
+}
+
+class Certificate
+{
+	long serial;
+	String subject;
+	String signatureAlgorithm;
+	String signature;
+	String issuer;
+	long validFrom;
+	long validTo;
+	String keyUsage;
+	String publicKey;
+	String thumbPrintAlgorithm;
+	String thumbPrint;
+}
+
+class BlockedCertificate {
+	long serial;
+}
+
+/*
+ * Relations
+ */
+
+relation ManagerHasBlockedCertificates
+{
+	CAManager playsRole blockingManager 
+	{
+		multiplicity 1;
+	}
+	BlockedCertificate playsRole blockedCertificates
+	{
+		multiplicity *;
+	}
+}

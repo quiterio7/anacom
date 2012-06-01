@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="CA-G0211" default="compile-all" basedir=".">
+	<description>CA Manager Build File</description>
+	
+	<property environment="env" />
+	<property file="${user.home}/build.properties"/>
+	<property file="build.properties"/>
+	<!-- Main Definitions to Project Configuration -->
+	<property name="application.name"   value="cacert" />
+	<property name="javac.encoding"     value="UTF-8" />
+	<property name="java.file.encoding" value="UTF-8" />
+	<!-- Main directories-->
+	<property name="src.rel-dir"      value="src/${application.name}" />
+	<property name="build.rel-dir"    value="build/${application.name}" />
+	<property name="dist.rel-dir"     value="dist/${application.name}" />
+	<property name="test.src.rel-dir" value="src/test/java/cacert" />
+    <!-- Directories with the source (java, dml, webap/ps) -->
+ 	<property name="java.src.rel-dir"      value="${src.rel-dir}/java" />
+	<property name="dml.src.rel-dir"       value="${src.rel-dir}/dml" />
+	<property name="config.src.rel-dir"    value="${src.rel-dir}/config" />
+	<property name="webas.src.rel-dir"     value="${src.rel-dir}/webas" />
+	<property name="test-db.rel-dir" value="test-db" />
+	<!-- JBoss references -->
+	<property name="jboss.temp.rel-dir" value="/tmp" />
+	<property name="db.rel-dir"         value="/tmp/db" />
+	<!-- WSDL References -->
+	<property name="stubs.package" value="cacert.shared.stubs" />
+	<property name="stubs-test.package" value="test.webservice.stubs" />
+	<property name="project.localwsdl" value="${webas.src.rel-dir}/${application.name}.wsdl" />
+	<!-- DML files -->
+	<property name="dml.filename" value="${application.name}.dml" />
+	<property name="dml.rel-file" value="${dml.src.rel-dir}/${dml.filename}" />
+	<!-- Directories with generated source -->
+	<property name="generated-src.build.rel-dir" value="${build.rel-dir}/src" />
+	<!-- Directories with the .class (used to build the wars) -->
+	<property name="classes.build.rel-dir" value="${build.rel-dir}/war/cacert/WEB-INF/classes" />
+	<!-- War distribution -->
+	<property name="war-es.target.rel-dir" value="${build.rel-dir}/war-es" />
+	<property name="war-es.filename"       value="${application.name}-es.war" />
+	<property name="dist.as.warfile" value="${dist.rel-dir}/${application.name}-as.war" />
+	<!-- Deploy directories -->
+	<property name="deploy.dir" value="${jboss.home}/standalone/deployments" />
+	 	
+	<!-- Important Paths to project Build File -->
+	<path id="project.classpath">
+		<pathelement location="${classes.build.rel-dir}" />
+		<fileset dir="${jboss.home}/modules">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib_JAX-R.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<path id="ws-stubs.classpath">
+		<fileset dir="${jboss.home}/modules">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib_JAX-R.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<taskdef resource="pt/ist/fenixframework/dml-ant.xml" 
+			     classpathref="project.classpath" />
+	
+	<!-- Preparing Environment -->
+	<target name="prepare">
+		<echo message="Preparing the project for build..." />
+		<mkdir dir="${classes.build.rel-dir}" />
+		<mkdir dir="${db.rel-dir}" />
+		<copy file="${dml.rel-file}" todir="${jboss.temp.rel-dir}" />
+	</target>
+	<!-- Generating Domain and WSDL stubs -->
+	<target name="generate-domain" depends="prepare">
+		<echo message="Generating base domain classes..." />
+		<echo message="Using: ${dml.rel-file}" />
+		<dml-domain-generator destDirectory="${java.src.rel-dir}" 
+			                  destDirectoryBase="${generated-src.build.rel-dir}">
+			<fileset file="${dml.rel-file}" />
+		</dml-domain-generator>
+	</target>
+	<target name="generate-ws-stubs" depends="prepare" 
+		    description="Generate Web Service Java code from local WSDL, for the server">
+		<taskdef name="wsconsume" classname="org.jboss.ws.tools.ant.WSConsumeTask">
+			<classpath>
+				<path refid="ws-stubs.classpath" />
+			</classpath>
+		</taskdef>
+		<echo message="Executing wsconsume to generate server-side code..." />
+		<echo message="WSDL: ${project.localwsdl}" />
+		<wsconsume fork="false" verbose="true" keep="true"
+	       package="${stubs.package}"
+	       wsdl="${project.localwsdl}"
+		   sourcedestdir="${generated-src.build.rel-dir}" 
+		   destdir="${classes.build.rel-dir}" />
+	</target>
+	
+	<target name="generate-code" depends="generate-domain, generate-ws-stubs">
+	    <copy todir="${generated-src.build.rel-dir}">
+		      <fileset dir="${security.rel.dir}">
+		        <include name="**/*.java"/>
+		      </fileset>
+	    </copy>
+	</target>
+	
+	<!--Compiling Domain DML and Source Code -->
+	<target name="compile-domain" depends="generate-code">
+		<echo message="Compiling sources..." />
+		<javac destdir="${classes.build.rel-dir}" 
+			   debug="true" debuglevel="lines,vars,source" 
+			   optimize="true" deprecation="true" verbose="false" 
+			   includeantruntime="false">
+			<classpath refid="project.classpath" />
+			<src>
+				<pathelement path="${generated-src.build.rel-dir}:${java.src.rel-dir}" />
+			</src>
+			<compilerarg line="" />
+		</javac>
+	</target>
+	
+	<target name="compile-all" depends="compile-domain, instrument-classes" />
+	
+	<target name="instrument-classes" depends="">
+		<echo message="Injecting ByteCode to reinitialize FenixFramework persisted objects :)" />
+		<dml-post-processor dir="${classes.build.rel-dir}">
+			<fileset file="${dml.rel-file}" />
+			<classpath refid="project.classpath" />
+		</dml-post-processor>
+	</target>
+	
+	<!-- Deploying Stuff -->
+	<target name="copy-web-xml" depends="" description="copy web.xml to its location">
+		  <copy overwrite="true" tofile="${webas.src.rel-dir}/WEB-INF/web.xml" file="${webas.src.rel-dir}/WEB-INF/${application.name}.xml" />
+		</target>
+		
+	<target name="copy-handlers" depends="" description="Copy xml soap handlers files">
+		<copy todir="${classes.build.rel-dir}">
+			<fileset dir="${java.src.rel-dir}">
+				<include name="**/*.xml"/>
+			</fileset>
+		</copy>
+	</target>
+
+	  <target name="war-as-sd" depends="compile-all, copy-web-xml, copy-handlers" description="Create the web service distribution archive">
+	    <war warfile="${dist.rel-dir}/${application.name}-as.war" webxml="${webas.src.rel-dir}/WEB-INF/web.xml">
+	      <classes dir="${classes.build.rel-dir}" />
+	      <tarfileset dir="${webas.src.rel-dir}">
+					<include name="*.wsdl" />
+	      </tarfileset>
+	      <tarfileset dir="${lib.rel-dir}" prefix="WEB-INF/lib">
+					<include name="**.jar" />
+	      </tarfileset>
+	      <tarfileset dir="${webas.src.rel-dir}" prefix="WEB-INF/classes">
+					<include name="uddi.xml"/>
+			  </tarfileset>
+			  <tarfileset dir="${lib_JAX-R.rel-dir}" prefix="WEB-INF/lib">
+				<include name="**.jar" />
+			  </tarfileset>
+	    </war>
+	  </target>
+	
+	<target name="deploy" depends="war-as-sd" description="Deploy CA web service to JBoss AS">
+		 	<fail unless="jboss.home">project.jboss.home not set</fail>
+		 	<copy todir="${deploy.dir}" file="${dist.rel-dir}/${application.name}-as.war" />
+		    <copy todir="${env.JBOSS_HOME}/bin">
+		            <fileset dir=".">
+		                <include name="**/*.key"/>
+		            </fileset>
+		    </copy>
+	</target>
+
+	<!-- Cleaning Databases and directories -->
+	<target name="clean-all" description="Cleans the compiled classes and generated sources">
+		<delete dir="${build.rel-dir}" />
+		<delete dir="${dist.rel-dir}" />
+		<delete dir="${db.rel-dir}" />
+		<delete dir="${test-db.rel-dir}"/>
+		<delete dir="${dml.jboss.rel-file}" />
+	</target>
+	<target name="clean-dbs" description="Cleans all data bases in tmp folder">
+		<delete dir="${db.rel-dir}"/>
+		<delete dir="${test-db.rel-dir}"/>
+	</target>
+	
+	<!-- Clean JBOSS database -->
+		<target name="clean-jboss" depends="" description="Clean Tomcat database.">
+			<delete dir="${env.JBOSS_HOME}/standalone/deployments"/>
+		</target>
+	
+	<!-- Test Commands -->
+	<!-- TESTS COMPILATION -->
+		<target name="compile-tests" depends="compile-all" 
+		    description="Compile the tests">
+			<javac destdir="${classes.build.rel-dir}" 
+			   debug="true" debuglevel="lines,vars,source"  
+			   optimize="true" deprecation="true" verbose="false" 
+			   includeantruntime="false" encoding="${javac.encoding}">
+			<classpath refid="project.classpath" />
+			<src>
+				<pathelement path="${test.src.rel-dir}/service" />
+			</src>
+			</javac>
+		</target>
+	
+		<target name="wsconsume" depends="" description="Generate Web Service client-side Java code from WSDL">
+	    	<taskdef name="wsconsume" classname="org.jboss.ws.tools.ant.WSConsumeTask">
+	    		<classpath>
+	    		<path refid="project.classpath" />
+	   	        </classpath>
+	    	</taskdef>
+
+	        <echo message="Executing wsconsume to generate client-side code..." />
+	        <echo message="WSDL: http://localhost:8080/cacert-as/CacertApplicationServer?wsdl" />
+	    	<wsconsume 
+	    	  fork="true"
+	    	  verbose="true"
+	    	  destdir="${build.rel-dir}"
+	    	  sourcedestdir="${generated-src.build.rel-dir}"
+	    	  package="${stubs-test.package}"
+	    	  keep="true"
+	    	  wsdllocation="http://localhost:8080/cacert-as/CacertApplicationServer?wsdl" 
+	    	  wsdl="http://localhost:8080/cacert-as/CacertApplicationServer?wsdl" />
+	    </target>
+	
+		<target name="compile-tests-webservice" depends="compile-all" 
+			    description="Compile the tests">
+				<javac destdir="${classes.build.rel-dir}" 
+				   debug="true" debuglevel="lines,vars,source"  
+				   optimize="true" deprecation="true" verbose="false" 
+				   includeantruntime="false" encoding="${javac.encoding}">
+				<classpath refid="project.classpath" />
+				<src>
+					<pathelement path="${test.src.rel-dir}/webservice" />
+				</src>
+				</javac>
+			</target>
+	
+	
+	<!-- Test Sign Certificate -->
+	<target name="test-CA-SignCertificate" depends="" description="Run sign Certificate Test">
+		<echo message="[CACERT TESTS] -- Compile tests first!"/>
+		<echo message="[CACERT TESTS] -- Testing Sign Certificate:"/>
+	   <junit>
+	    <classpath refid="project.classpath" />
+	    <formatter type="brief" usefile="false" />
+	    <test name="cacert.webservice.SignCertificateTestCase" />
+	    </junit>
+	</target>
+	
+	 <!-- Test AddAndGetBlockedList -->
+	    <target name="test-CA-AddAndGetBlockedList" depends="" description="Run AddAndGetBlockedList">
+	        <echo message="[CACERT TESTS] -- Compile tests first!"/>
+	        <echo message="[CACERT TESTS] -- Testing Add and Get BlockedList:"/>
+	       <junit>
+	        <classpath refid="project.classpath" />
+	        <formatter type="brief" usefile="false" />
+	       	<test name="cacert.webservice.AddAndGetBlockedListTestCase" />
+	        </junit>
+	   </target>
+	
+	<target name="test-CA-NoHandler" depends="" description="Run NoHandler Test case">
+	            <echo message="[CACERT TESTS] -- Compile tests first!"/>
+	            <echo message="[CACERT TESTS] -- Testing NoHandler:"/>
+	           <junit>
+	            <classpath refid="project.classpath" />
+	            <formatter type="brief" usefile="false" />
+                <test name="cacert.webservice.NoHandlerTestCase" />
+	            </junit>
+	  </target>
+	
+	<target name="test-CA-PersonificationTestCase" depends="" description="Run PersonificationTestCase Test case">
+	                <echo message="[CACERT TESTS] -- Compile tests first!"/>
+	                <echo message="[CACERT TESTS] -- Testing PersonificationTestCase:"/>
+	               <junit>
+	                <classpath refid="project.classpath" />
+	                <formatter type="brief" usefile="false" />
+	               	<test name="cacert.webservice.PersonificationTestCase" />
+	                </junit>
+	      </target>
+	
+	<target name="test-CA-BinzantineHandlerTestCase" depends="" description="Run BinzantineHandlerTestCase Test case">
+	                    <echo message="[CACERT TESTS] -- Compile tests first!"/>
+	                    <echo message="[CACERT TESTS] -- Testing BinzantineHandlerTestCase:"/>
+	                   <junit>
+	                    <classpath refid="project.classpath" />
+	                    <formatter type="brief" usefile="false" />
+	                   	<test name="cacert.webservice.BinzantineHandlerTestCase" />
+	                    </junit>
+	 </target>
+	
+	<target name="test-CA-XJunit" depends="compile-tests" description="Run the tests">
+	            <echo message="Testing all services..." />
+	            <junit>
+	              <classpath refid="project.classpath" />
+	              <formatter type="brief" usefile="false" />
+	              <test name="cacert.service.SignCertificateTestCase" />
+	              <test name="cacert.service.SetKeysServiceTest" />
+	              <test name="cacert.service.SetValidPeriodServiceTest" />
+	              <test name="cacert.service.AddAndGetBlockedCertificateTestCase" />
+	            </junit>
+	          </target>
+</project>

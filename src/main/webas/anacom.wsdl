@@ -1,0 +1,1475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions name="anacomApplicationServer"
+             targetNamespace="http://anacom"
+             xmlns:tns="http://anacom"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+	<types>
+		<xsd:schema elementFormDefault="qualified"
+			targetNamespace="http://anacom">
+    
+    		<!--
+    			DTOs
+    		-->    
+	  
+			<!-- Phone DTO -->  
+			<xsd:complexType name="phoneType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="balance" type="xsd:integer" />	
+					<xsd:element name="timestamp" type="xsd:dateTime" />		
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="phone" type="tns:phoneType" />
+
+			<!-- Phone Number DTO -->
+			<xsd:complexType name="phoneNumberType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />	
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="phoneNumber1" type="tns:phoneNumberType" />
+			<xsd:element name="phoneNumber2" type="tns:phoneNumberType" />
+			<xsd:element name="phoneNumber3" type="tns:phoneNumberType" />
+			<xsd:element name="phoneNumber4" type="tns:phoneNumberType" />
+			<xsd:element name="phoneNumber5" type="tns:phoneNumberType" />
+
+			<!-- Increase Phone Balance DTO -->  
+			<xsd:complexType name="increasePhoneBalanceType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="amount" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />			
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="increasePhoneBalance" type="tns:increasePhoneBalanceType" />
+      
+			<!-- Operator Detailed DTO -->
+			<xsd:complexType name="operatorDetailedType">
+				<xsd:sequence>
+					<xsd:element name="name" type="xsd:string" />
+					<xsd:element name="prefix" type="xsd:string" />
+					<xsd:element name="smsCost" type="xsd:integer" />
+					<xsd:element name="voiceCost" type="xsd:integer" />
+					<xsd:element name="videoCost" type="xsd:integer" />
+					<xsd:element name="tax" type="xsd:integer" />
+					<xsd:element name="bonus" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="operatorDetailed" type="tns:operatorDetailedType" />
+
+			<!-- Operator Prefix DTO -->
+			<xsd:complexType name="operatorPrefixType">
+				<xsd:sequence>
+					<xsd:element name="prefix" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="operatorPrefix" type="tns:operatorPrefixType" />      
+      
+			<!-- Phone List DTO -->
+			<xsd:complexType name="phoneListType">
+				<xsd:sequence>
+					<xsd:element minOccurs="0" maxOccurs="unbounded" name="phoneDTOList" type="tns:phoneType"/>
+					<xsd:element name="timestamp" type="xsd:dateTime" />	
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="phoneList" type="tns:phoneListType" /> 
+      
+			<!-- Receive SMS DTO -->
+			<xsd:complexType name="receiveSMSType">
+				<xsd:sequence>
+					<xsd:element name="message" type="xsd:string" />
+					<xsd:element name="source" type="xsd:string" />
+					<xsd:element name="destination" type="xsd:string" />
+					<xsd:element name="cost" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="receiveSMS" type="tns:receiveSMSType" />
+      
+			<!-- Register Phone DTO -->
+			<xsd:complexType name="registerPhoneType">
+				<xsd:sequence>
+					<xsd:element name="type" type="xsd:string" />
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="opPrefix" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="registerPhone" type="tns:registerPhoneType" />
+      
+			<!-- Send SMS DTO -->
+			<xsd:complexType name="sendSMSType">
+				<xsd:sequence>
+					<xsd:element name="message" type="xsd:string" />
+					<xsd:element name="source" type="xsd:string" />
+					<xsd:element name="destination" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="sendSMS" type="tns:sendSMSType" />
+			
+			<!-- Received SMS DTO -->
+			<xsd:complexType name="receivedSMSType">
+				<xsd:sequence>
+					<xsd:element name="message" type="xsd:string" />
+					<xsd:element name="source" type="xsd:string" />
+					<xsd:element name="cost" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="receivedSMS" type="tns:receivedSMSType" />
+			
+			<!-- Phone State DTO -->  
+	  		<xsd:complexType name="phoneStateType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />		
+					<xsd:element name="timestamp" type="xsd:dateTime" />	
+	  			</xsd:sequence>
+	  		</xsd:complexType>
+    		<xsd:element name="phoneState" type="tns:phoneStateType" />
+    		
+    		<!-- Phone SMS Messages DTO -->  
+	  		<xsd:complexType name="receivedSMSListType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element minOccurs="0" maxOccurs="unbounded" name="SMSDTOList" type="tns:receivedSMSType"/>
+					<xsd:element name="timestamp" type="xsd:dateTime" />			
+	  			</xsd:sequence>
+	  		</xsd:complexType>
+    		<xsd:element name="receivedSMSList" type="tns:receivedSMSListType" />
+    		
+    		<!-- Last Made Communication DTO -->  
+	  		<xsd:complexType name="lastMadeCommunicationType">
+				<xsd:sequence>
+					<xsd:element name="destination" type="xsd:string" />
+					<xsd:element name="communicationType" type="xsd:string" />
+					<xsd:element name="cost" type="xsd:integer" />
+					<xsd:element name="total" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+	  			</xsd:sequence>
+	  		</xsd:complexType>
+    		<xsd:element name="lastMadeCommunication" type="tns:lastMadeCommunicationType" />
+    		
+    		<!-- Call DTO -->  
+	  		<xsd:complexType name="makeCallType">
+				<xsd:sequence>
+					<xsd:element name="source" type="xsd:string" />
+					<xsd:element name="destination" type="xsd:string" />
+					<xsd:element name="type" type="xsd:string" />
+					<xsd:element name="startTime" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+	  			</xsd:sequence>
+	  		</xsd:complexType>
+    		<xsd:element name="makeCall1" type="tns:makeCallType" />
+    		<xsd:element name="makeCall2" type="tns:makeCallType" />
+			
+			<!-- FinishCall DTO -->
+			<xsd:complexType name="finishCallType">
+				<xsd:sequence>
+					<xsd:element name="source" type="xsd:string" />
+					<xsd:element name="endTime" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="finishCall" type="tns:finishCallType" />
+			
+			<!-- FinishCallOnDestination DTO -->
+			<xsd:complexType name="finishCallOnDestinationType">
+				<xsd:sequence>
+					<xsd:element name="destination" type="xsd:string" />
+					<xsd:element name="duration" type="xsd:integer" />
+					<xsd:element name="cost" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="finishCallOnDestination" type="tns:finishCallOnDestinationType" />
+
+		<!-- Void response DTO -->
+			<xsd:complexType name="voidResponseType">
+				<xsd:sequence>
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="voidResponse" type="tns:voidResponseType" />
+
+			<!-- 
+				EXCEPTIONS 
+			-->
+			
+			<!--  Operator Name Already Exists Exception -->      	 
+			<xsd:complexType name="OperatorNameAlreadyExistsType">
+				<xsd:sequence>
+					<xsd:element name="name" type="xsd:string" />
+					<xsd:element name="prefix" type="xsd:string" />
+					<xsd:element name="smsCost" type="xsd:integer" />
+					<xsd:element name="voiceCost" type="xsd:integer" />
+					<xsd:element name="videoCost" type="xsd:integer" />
+					<xsd:element name="tax" type="xsd:integer" />
+					<xsd:element name="bonus" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="OperatorNameAlreadyExistsException" type="tns:OperatorNameAlreadyExistsType" />
+  
+			<!--  Communication Error Exception -->      	 
+			<xsd:complexType name="CommunicationErrorType">
+				<xsd:sequence>
+					<xsd:element name="service" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="CommunicationErrorException" type="tns:CommunicationErrorType" />
+      
+			<!--  Unrecognised Prefix Exception -->
+			<xsd:complexType name="UnrecognisedPrefixType">
+				<xsd:sequence>
+					<xsd:element name="operatorPrefix" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="UnrecognisedPrefixException" type="tns:UnrecognisedPrefixType" />
+
+			<!--  Phone Not Exists Exception -->
+			<xsd:complexType name="PhoneNotExistsType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="PhoneNotExistsException" type="tns:PhoneNotExistsType" />
+      
+			<!--  Balance Limit Exceeded Exception -->
+			<xsd:complexType name="BalanceLimitExceededType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="BalanceLimitExceededException" type="tns:BalanceLimitExceededType" />
+      
+			<!--  Can't Receive SMS Exception -->
+			<xsd:complexType name="CantReceiveSMSType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="CantReceiveSMSException" type="tns:CantReceiveSMSType" />
+      
+			<!--  Can't Send SMS Exception -->
+			<xsd:complexType name="CantSendSMSType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="CantSendSMSException" type="tns:CantSendSMSType" />
+      
+			<!--  Incompatible Prefix Exception -->
+			<xsd:complexType name="IncompatiblePrefixType">
+				<xsd:sequence>
+					<xsd:element name="operatorprefix" type="xsd:string" />
+					<xsd:element name="phoneprefix" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="IncompatiblePrefixException" type="tns:IncompatiblePrefixType" />
+      
+			<!--  Invalid Amount Exception -->
+			<xsd:complexType name="InvalidAmountType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="amount" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="InvalidAmountException" type="tns:InvalidAmountType" />
+      
+			<!--  Invalid State Send SMS Exception -->
+			<xsd:complexType name="InvalidStateSendSMSType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="InvalidStateSendSMSException" type="tns:InvalidStateSendSMSType" />
+			
+			<!--  Invalid State Make Voice Call Exception -->
+			<xsd:complexType name="InvalidStateMakeVoiceType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="InvalidStateMakeVoiceException" type="tns:InvalidStateMakeVoiceType" />
+			
+			<!--  Invalid State Make Video Call Exception -->
+			<xsd:complexType name="InvalidStateMakeVideoType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="InvalidStateMakeVideoException" type="tns:InvalidStateMakeVideoType" />
+			
+			<!--  Invalid State Receive Voice Call Exception -->
+			<xsd:complexType name="InvalidStateReceiveVoiceType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="InvalidStateReceiveVoiceException" type="tns:InvalidStateReceiveVoiceType" />
+			
+			<!--  Invalid State Receive Video Call Exception -->
+			<xsd:complexType name="InvalidStateReceiveVideoType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="state" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="InvalidStateReceiveVideoException" type="tns:InvalidStateReceiveVideoType" />
+      
+			<!--  Not Positive Balance Exception -->
+			<xsd:complexType name="NotPositiveBalanceType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="balance" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="NotPositiveBalanceException" type="tns:NotPositiveBalanceType" />
+      
+			<!--  Operator Prefix Already Exists Exception -->
+			<xsd:complexType name="OperatorPrefixAlreadyExistsType">
+				<xsd:sequence>
+					<xsd:element name="name" type="xsd:string" />
+					<xsd:element name="prefix" type="xsd:string" />
+					<xsd:element name="smsCost" type="xsd:integer" />
+					<xsd:element name="voiceCost" type="xsd:integer" />
+					<xsd:element name="videoCost" type="xsd:integer" />
+					<xsd:element name="tax" type="xsd:integer" />
+					<xsd:element name="bonus" type="xsd:integer" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="OperatorPrefixAlreadyExistsException" type="tns:OperatorPrefixAlreadyExistsType" />
+      
+			<!--  Operator Prefix Not Valid Exception -->
+			<xsd:complexType name="OperatorPrefixNotValidType">
+				<xsd:sequence>
+					<xsd:element name="prefix" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="OperatorPrefixNotValidException" type="tns:OperatorPrefixNotValidType" />
+    
+			<!--  Operator Name Not Valid Exception -->
+			<xsd:complexType name="OperatorNameNotValidType">
+				<xsd:sequence>
+					<xsd:element name="name" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="OperatorNameNotValidException" type="tns:OperatorNameNotValidType" />
+      
+			<!--  Phone Already Exists Exception -->
+			<xsd:complexType name="PhoneAlreadyExistsType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="PhoneAlreadyExistsException" type="tns:PhoneAlreadyExistsType" />
+      
+			<!--  Phone Number Not Valid Exception -->
+			<xsd:complexType name="PhoneNumberNotValidType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="PhoneNumberNotValidException" type="tns:PhoneNumberNotValidType" />
+      
+			<!--  SMS Message Not Valid Exception -->
+			<xsd:complexType name="SMSMessageNotValidType">
+				<xsd:sequence>
+					<xsd:element name="otherParty" type="xsd:string" />
+					<xsd:element name="message" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="SMSMessageNotValidException" type="tns:SMSMessageNotValidType" />
+			
+			<!--  Invalid Phone State Exception -->
+		    <xsd:complexType name="InvalidStateType">
+				<xsd:sequence>
+			  		<xsd:element name="number" type="xsd:string" />
+			  		<xsd:element name="state" type="xsd:string" />
+			  		<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+		    <xsd:element name="InvalidStateException" type="tns:InvalidStateType" />
+		    
+		    <!--  Invalid Phone Type Exception -->
+		    <xsd:complexType name="InvalidPhoneTypeType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="type" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="InvalidPhoneTypeException" type="tns:InvalidPhoneTypeType" />
+		    
+		    <!--  Bonus Not Valid Exception -->
+		    <xsd:complexType name="BonusValueNotValidType">
+		    	<xsd:sequence>
+		    		<xsd:element name="bonus" type="xsd:integer" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="BonusValueNotValidException" type="tns:BonusValueNotValidType" />
+		    
+		    <!--  CantMakeVoiceCall Exception -->
+		    <xsd:complexType name="CantMakeVoiceCallType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="CantMakeVoiceCallException" type="tns:CantMakeVoiceCallType" />
+		    
+		    <!--  CantMakeVideoCall Exception -->
+		    <xsd:complexType name="CantMakeVideoCallType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="CantMakeVideoCallException" type="tns:CantMakeVideoCallType" />
+		    
+		    <!--  CantReceiveVideoCall Exception -->
+		    <xsd:complexType name="CantReceiveVideoCallType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="CantReceiveVideoCallException" type="tns:CantReceiveVideoCallType" />
+		    
+		    <!--  CantReceiveVoiceCall Exception -->
+		    <xsd:complexType name="CantReceiveVoiceCallType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="CantReceiveVoiceCallException" type="tns:CantReceiveVoiceCallType" />
+		    
+		    <!--  Invalid Call Type Exception -->
+		    <xsd:complexType name="InvalidCallTypeType">
+		    	<xsd:sequence>
+		    		<xsd:element name="otherParty" type="xsd:string" />
+		    		<xsd:element name="type" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="InvalidCallTypeException" type="tns:InvalidCallTypeType" />
+		    
+		    <!-- DurationNotValid Exception -->
+		    <xsd:complexType name="DurationNotValidType">
+		    	<xsd:sequence>
+		    		<xsd:element name="otherParty" type="xsd:string" />
+		    		<xsd:element name="duration" type="xsd:integer" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="DurationNotValidException" type="tns:DurationNotValidType" />
+		    
+		    <!-- InvalidStateFinishMakingCall Exception -->
+		    <xsd:complexType name="InvalidStateFinishMakingCallType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="state" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="InvalidStateFinishMakingCallException" type="tns:InvalidStateFinishMakingCallType" />
+		    
+		    <!-- InvalidStateFinishReceivingCall Exception -->
+		    <xsd:complexType name="InvalidStateFinishReceivingCallType">
+		    	<xsd:sequence>
+		    		<xsd:element name="number" type="xsd:string" />
+		    		<xsd:element name="state" type="xsd:string" />
+		    		<xsd:element name="timestamp" type="xsd:dateTime" />
+		    	</xsd:sequence>
+		    </xsd:complexType>
+		    <xsd:element name="InvalidStateFinishReceivingCallException" type="tns:InvalidStateFinishReceivingCallType" />
+		    
+		    <!--  Phone Number Not Valid Exception -->
+			<xsd:complexType name="NoMadeCommunicationType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="NoMadeCommunicationException" type="tns:NoMadeCommunicationType" />
+			
+			<!--  Phone Number Not Valid Exception -->
+			<xsd:complexType name="CantChangeStateType">
+				<xsd:sequence>
+					<xsd:element name="number" type="xsd:string" />
+					<xsd:element name="currentState" type="xsd:string" />
+					<xsd:element name="invalidState" type="xsd:string" />
+					<xsd:element name="timestamp" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="CantChangeStateException" type="tns:CantChangeStateType" />
+			
+		</xsd:schema>
+	</types>
+
+
+    <!-- Message definitions
+
+         In document-literal style, each message has a single part
+         that refers to a XML element defined in the XML Schema Definition.
+    -->
+    
+    <!-- Exceptions -->
+    <message name="UnrecognisedPrefixException">
+    	<part name="reason" element="tns:UnrecognisedPrefixException" />
+    </message>
+
+	<message name="CommunicationErrorException">
+		<part name="reason" element="tns:CommunicationErrorException" />
+	</message>
+      
+	<message name="OperatorNameAlreadyExistsException">
+		<part name="reason" element="tns:OperatorNameAlreadyExistsException" />
+	</message>
+
+	<message name="PhoneNotExistsException">
+		<part name="reason" element="tns:PhoneNotExistsException" />
+	</message>
+    
+	<message name="BalanceLimitExceededException">
+		<part name="reason" element="tns:BalanceLimitExceededException" />
+	</message>
+    
+	<message name="CantReceiveSMSException">
+		<part name="reason" element="tns:CantReceiveSMSException" />
+	</message>
+    
+	<message name="CantSendSMSException">
+		<part name="reason" element="tns:CantSendSMSException" />
+	</message>
+    
+	<message name="IncompatiblePrefixException">
+		<part name="reason" element="tns:IncompatiblePrefixException" />
+	</message>
+    
+	<message name="InvalidAmountException">
+		<part name="reason" element="tns:InvalidAmountException" />
+	</message>
+    
+	<message name="InvalidStateSendSMSException">
+		<part name="reason" element="tns:InvalidStateSendSMSException" />
+	</message>
+	
+	<message name="InvalidStateMakeVoiceException">
+		<part name="reason" element="tns:InvalidStateMakeVoiceException" />
+	</message>
+	
+	<message name="InvalidStateMakeVideoException">
+		<part name="reason" element="tns:InvalidStateMakeVideoException" />
+	</message>
+	
+	<message name="InvalidStateReceiveVoiceException">
+		<part name="reason" element="tns:InvalidStateReceiveVoiceException" />
+	</message>
+	
+	<message name="InvalidStateReceiveVideoException">
+		<part name="reason" element="tns:InvalidStateReceiveVideoException" />
+	</message>
+    
+	<message name="NotPositiveBalanceException">
+		<part name="reason" element="tns:NotPositiveBalanceException" />
+	</message>
+    
+	<message name="OperatorPrefixAlreadyExistsException">
+		<part name="reason" element="tns:OperatorPrefixAlreadyExistsException" />
+	</message>
+    
+	<message name="OperatorPrefixNotValidException">
+		<part name="reason" element="tns:OperatorPrefixNotValidException" />
+	</message>
+    
+	<message name="OperatorNameNotValidException">
+		<part name="reason" element="tns:OperatorNameNotValidException" />
+	</message>
+    
+	<message name="PhoneAlreadyExistsException">
+		<part name="reason" element="tns:PhoneAlreadyExistsException" />
+	</message>
+    
+	<message name="PhoneNumberNotValidException">
+		<part name="reason" element="tns:PhoneNumberNotValidException" />
+	</message>
+    
+	<message name="SMSMessageNotValidException">
+		<part name="reason" element="tns:SMSMessageNotValidException" />
+	</message>
+	
+	<message name="InvalidStateException">
+    	<part name="reason" element="tns:InvalidStateException"/>
+    </message>
+    
+    <message name="InvalidPhoneTypeException">
+    	<part name="reason" element="tns:InvalidPhoneTypeException"/>
+    </message>
+    
+    <message name="BonusValueNotValidException">
+    	<part name="reason" element="tns:BonusValueNotValidException"/>
+    </message>
+    
+    <message name="CantChangeStateException">
+    	<part name="reason" element="tns:CantChangeStateException"/>
+    </message>
+    
+    <message name="InvalidCallTypeException">
+    	<part name="reason" element="tns:InvalidCallTypeException"/>
+    </message>
+    <message name="CantMakeVoiceCallException">
+    	<part name="reason" element="tns:CantMakeVoiceCallException"/>
+    </message>
+    
+    <message name="CantMakeVideoCallException">
+    	<part name="reason" element="tns:CantMakeVideoCallException"/>
+    </message>
+    
+    <message name="CantReceiveVideoCallException">
+    	<part name="reason" element="tns:CantReceiveVideoCallException"/>
+    </message>
+    
+    <message name="CantReceiveVoiceCallException">
+    	<part name="reason" element="tns:CantReceiveVoiceCallException"/>
+    </message>
+    
+    <message name="DurationNotValidException">
+    	<part name="reason" element="tns:DurationNotValidException"/>
+    </message>
+    
+    <message name="InvalidStateFinishMakingCallException">
+    	<part name="reason" element="tns:InvalidStateFinishMakingCallException"/>
+    </message>
+    
+    <message name="NoMadeCommunicationException">
+    	<part name="reason" element="tns:NoMadeCommunicationException"/>
+    </message>
+    
+    <message name="InvalidStateFinishReceivingCallException">
+    	<part name="reason" element="tns:InvalidStateFinishReceivingCallException"/>
+    </message>
+    
+	<!--  Create Operator -->
+	<message name="CreateOperatorRequest">
+		<part name="parameters" element="tns:operatorDetailed" />
+	</message>
+	
+	<message name="CreateOperatorResponse">
+		<part name="parameters" element="tns:voidResponse" />
+	</message>
+
+	<!-- List Operator Phones -->
+	<message name="ListOperatorPhonesRequest">
+		<part name="parameters" element="tns:operatorPrefix" />
+	</message>
+    
+	<message name="ListOperatorPhonesResponse" >
+		<part name="result" element="tns:phoneList" />
+	</message>
+    
+	<!-- Cancel Phone Registry -->
+	<message name="CancelPhoneRequest">
+		<part name="parameters" element="tns:phoneNumber1" />
+	</message>
+    
+	<message name="CancelPhoneResponse" >
+		<part name="parameters" element="tns:voidResponse" />
+	</message>
+
+	<!-- Get Phone Balance -->
+	<message name="GetPhoneBalanceRequest">
+		<part name="parameters" element="tns:phoneNumber2" />
+	</message>
+    
+	<message name="GetPhoneBalanceResponse" >
+		<part name="result" element="tns:phone" />
+	</message>
+    
+	<!-- Increase Phone Balance -->
+	<message name="IncreasePhoneBalanceRequest">
+		<part name="parameters" element="tns:increasePhoneBalance" />
+	</message>
+    
+	<message name="IncreasePhoneBalanceResponse">
+		<part name="parameters" element="tns:voidResponse" />
+	</message>
+
+    
+	<!-- Receive SMS -->
+	<message name="ReceiveSMSRequest">
+		<part name="parameters" element="tns:receiveSMS" />
+	</message>
+    
+	<message name="ReceiveSMSResponse">
+		<part name="parameters" element="tns:voidResponse" />
+	</message>
+
+    
+	<!-- Send SMS -->
+	<message name="SendSMSRequest">
+		<part name="parameters" element="tns:sendSMS" />
+	</message>
+    
+	<message name="SendSMSResponse">
+		<part name="parameters" element="tns:receiveSMS" />
+	</message>
+    
+	<!-- Register Phone -->
+	<message name="RegisterPhoneRequest">
+		<part name="parameters" element="tns:registerPhone" />
+	</message>
+    
+	<message name="RegisterPhoneResponse">
+		<part name="parameters" element="tns:voidResponse" />
+	</message>
+
+	
+	 <!-- Set Phone State -->
+    <message name="SetPhoneStateRequest">
+    	<part name="parameters" element="tns:phoneState" />
+    </message>
+    
+    <message name="SetPhoneStateResponse">
+			<part name="parameters" element="tns:voidResponse" />
+		</message>
+
+    
+    <!-- Get Phone State -->
+    <message name="GetPhoneStateRequest">
+    	<part name="parameters" element="tns:phoneNumber3" />
+    </message>
+    
+    <message name="GetPhoneStateResponse">
+    	<part name="result" element="tns:phoneState" />
+    </message>
+    
+    <!-- Get Phone SMS Received Messages List -->
+    <message name="GetPhoneSMSReceivedMessagesRequest">
+    	<part name="parameters" element="tns:phoneNumber4" />
+    </message>
+    
+    <message name="GetPhoneSMSReceivedMessagesResponse">
+    	<part name="result" element="tns:receivedSMSList" />
+    </message>
+    
+      <!-- Get Last Made Communication -->
+    <message name="GetLastMadeCommunicationRequest">
+    	<part name="parameters" element="tns:phoneNumber5" />
+    </message>
+    
+    <message name="GetLastMadeCommunicationResponse">
+    	<part name="result" element="tns:lastMadeCommunication" />
+    </message>
+    
+    <!-- make Call  -->
+    <message name="MakeCallRequest">
+    	<part name="parameters" element="tns:makeCall1" />
+    </message>
+    
+    <message name="MakeCallResponse">
+			<part name="parameters" element="tns:voidResponse" />
+		</message>
+
+    
+    <!-- Receive Call -->
+    <message name="ReceiveCallRequest">
+    	<part name="parameters" element="tns:makeCall2" />
+    </message>
+    
+    <message name="ReceiveCallResponse">
+    	<part name="parameters" element="tns:voidResponse" />
+		</message>
+    
+    
+    <!-- Finish Call  -->
+    <message name="FinishCallRequest">
+    	<part name="parameters" element="tns:finishCall" />
+    </message>
+    
+    <message name="FinishCallResponse">
+			<part name="parameters" element="tns:finishCallOnDestination" />
+		</message>
+	
+	<!-- Finish Call On Destination -->
+    <message name="FinishCallOnDestinationRequest">
+    	<part name="parameters" element="tns:finishCallOnDestination" />
+    </message>
+    
+    <message name="FinishCallOnDestinationResponse">
+			<part name="parameters" element="tns:voidResponse" />
+		</message>
+		
+		<!-- Revogate Certificate  -->
+    <message name="RevogateCertificateRequest" />
+    <message name="RevogateCertificateResponse" />
+
+
+	<!-- Port type definitions
+
+         A port type is a set of operations. It is similar in concept to a Java interface.
+
+         Each operation has an input message, an output message and, optionally,
+         fault messages.
+    -->
+	<portType name="AnacomApplicationServerPortType">
+    
+		<operation name="CreateNewOperator">
+			<input message="tns:CreateOperatorRequest" name="CreateOperatorRequest"/>
+			<output message="tns:CreateOperatorResponse" name="CreateOperatorResponse"/>
+			<fault message="tns:OperatorNameAlreadyExistsException" name="OperatorNameAlreadyExistsException"/>
+			<fault message="tns:OperatorPrefixAlreadyExistsException" name="OperatorPrefixAlreadyExistsException"/>
+			<fault message="tns:OperatorPrefixNotValidException" name="OperatorPrefixNotValidException"/>
+			<fault message="tns:OperatorNameNotValidException" name="OperatorNameNotValidException"/>
+			<fault message="tns:BonusValueNotValidException" name="BonusValueNotValidException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="ListOperatorPhones">
+			<input message="tns:ListOperatorPhonesRequest" name="ListOperatorPhonesRequest"/>
+			<output message="tns:ListOperatorPhonesResponse" name="ListOperatorPhonesResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+      
+		<operation name="CancelPhoneRegistry">
+			<input message="tns:CancelPhoneRequest" name="CancelPhoneRequest"/>
+			<output message="tns:CancelPhoneResponse" name="CancelPhoneResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+			
+		<operation name="GetPhoneBalance">
+			<input message="tns:GetPhoneBalanceRequest" name="GetPhoneBalanceRequest"/>
+			<output message="tns:GetPhoneBalanceResponse" name="GetPhoneBalanceResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+
+		<operation name="IncreasePhoneBalance">
+			<input message="tns:IncreasePhoneBalanceRequest" name="IncreasePhoneBalanceRequest"/>
+			<output message="tns:IncreasePhoneBalanceResponse" name="IncreasePhoneBalanceResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:InvalidAmountException" name="InvalidAmountException"/>
+			<fault message="tns:BalanceLimitExceededException" name="BalanceLimitExceededException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+      
+		<operation name="ReceiveSMS">
+			<input message="tns:ReceiveSMSRequest" name="ReceiveSMSRequest"/>
+			<output message="tns:ReceiveSMSResponse" name="ReceiveSMSResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+      
+		<operation name="SendSMS">
+			<input message="tns:SendSMSRequest" name="SendSMSRequest"/>
+			<output message="tns:SendSMSResponse" name="SendSMSResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:NotPositiveBalanceException" name="NotPositiveBalanceException"/>
+			<fault message="tns:InvalidStateSendSMSException" name="InvalidStateSendSMSException"/>
+			<fault message="tns:SMSMessageNotValidException" name="SMSMessageNotValidException"/>
+			<fault message="tns:InvalidAmountException" name="InvalidAmountException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+      
+		<operation name="RegisterPhone">
+			<input message="tns:RegisterPhoneRequest" name="RegisterPhoneRequest"/>
+			<output message="tns:RegisterPhoneResponse" name="RegisterPhoneResponse"/>
+			<fault message="tns:InvalidPhoneTypeException" name="InvalidPhoneTypeException"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneAlreadyExistsException" name="PhoneAlreadyExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:IncompatiblePrefixException" name="IncompatiblePrefixException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="SetPhoneState">
+			<input message="tns:SetPhoneStateRequest" name="SetPhoneStateRequest"/>
+			<output message="tns:SetPhoneStateResponse" name="SetPhoneStateResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:InvalidStateException" name="InvalidStateException"/>
+			<fault message="tns:CantChangeStateException" name="CantChangeStateException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="GetPhoneState">
+			<input message="tns:GetPhoneStateRequest" name="GetPhoneStateRequest"/>
+			<output message="tns:GetPhoneStateResponse" name="GetPhoneStateResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="GetPhoneSMSReceivedMessages">
+			<input message="tns:GetPhoneSMSReceivedMessagesRequest" name="GetPhoneSMSReceivedMessagesRequest"/>
+			<output message="tns:GetPhoneSMSReceivedMessagesResponse" name="GetPhoneSMSReceivedMessagesResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="GetLastMadeCommunication">
+			<input message="tns:GetLastMadeCommunicationRequest" name="GetLastMadeCommunicationRequest"/>
+			<output message="tns:GetLastMadeCommunicationResponse" name="GetLastMadeCommunicationResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:NoMadeCommunicationException" name="NoMadeCommunicationException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="MakeCall">
+			<input message="tns:MakeCallRequest" name="MakeCallRequest"/>
+			<output message="tns:MakeCallResponse" name="MakeCallResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:NotPositiveBalanceException" name="NotPositiveBalanceException"/>
+			<fault message="tns:InvalidStateMakeVoiceException" name="InvalidStateMakeVoiceException"/>
+			<fault message="tns:InvalidStateMakeVideoException" name="InvalidStateMakeVideoException"/>
+			<fault message="tns:CantMakeVoiceCallException" name="CantMakeVoiceCallException"/>
+			<fault message="tns:CantMakeVideoCallException" name="CantMakeVideoCallException"/>
+			<fault message="tns:InvalidCallTypeException" name="InvalidCallTypeException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="ReceiveCall">
+			<input message="tns:ReceiveCallRequest" name="ReceiveCallRequest"/>
+			<output message="tns:ReceiveCallResponse" name="ReceiveCallResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:InvalidStateReceiveVideoException" name="InvalidStateReceiveVideoException"/>
+			<fault message="tns:InvalidStateReceiveVoiceException" name="InvalidStateReceiveVoiceException"/>
+			<fault message="tns:CantReceiveVoiceCallException" name="CantReceiveVoiceCallException"/>
+			<fault message="tns:CantReceiveVideoCallException" name="CantReceiveVideoCallException"/>
+			<fault message="tns:InvalidCallTypeException" name="InvalidCallTypeException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="FinishCall">
+			<input message="tns:FinishCallRequest" name="FinishCallRequest"/>
+			<output message="tns:FinishCallResponse" name="FinishCallResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:DurationNotValidException" name="DurationNotValidException"/>
+			<fault message="tns:InvalidStateFinishMakingCallException" name="InvalidStateFinishMakingCallException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="FinishCallOnDestination">
+			<input message="tns:FinishCallOnDestinationRequest" name="FinishCallOnDestinationRequest"/>
+			<output message="tns:FinishCallOnDestinationResponse" name="FinishCallOnDestinationResponse"/>
+			<fault message="tns:UnrecognisedPrefixException" name="UnrecognisedPrefixException"/>
+			<fault message="tns:PhoneNotExistsException" name="PhoneNotExistsException"/>
+			<fault message="tns:PhoneNumberNotValidException" name="PhoneNumberNotValidException"/>
+			<fault message="tns:DurationNotValidException" name="DurationNotValidException"/>
+			<fault message="tns:InvalidStateFinishReceivingCallException" name="InvalidStateFinishReceivingCallException"/>
+			<fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+		</operation>
+		
+		<operation name="RevogateCertificate">
+          <input message="tns:RevogateCertificateRequest" name="RevogateCertificateRequest"/>
+          <output message="tns:RevogateCertificateResponse" name="RevogateCertificateResponse"/>
+          <fault message="tns:CommunicationErrorException" name="CommunicationErrorException"/>
+        </operation>
+		
+	</portType>
+
+	<binding name="AnacomApplicationServerBinding" type="tns:AnacomApplicationServerPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+      	
+		<operation name="CreateNewOperator">
+			<soap:operation soapAction="write" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="OperatorNameAlreadyExistsException">
+				<soap:fault use="literal" name="OperatorNameAlreadyExistsException"/>
+			</fault>
+			<fault name="OperatorPrefixAlreadyExistsException">
+				<soap:fault use="literal" name="OperatorPrefixAlreadyExistsException"/>
+			</fault>
+			<fault name="BonusValueNotValidException">
+				<soap:fault use="literal" name="BonusValueNotValidException"/>
+			</fault>
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+        
+		<operation name="ListOperatorPhones">
+			<soap:operation soapAction="read" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+        
+		<operation name="CancelPhoneRegistry">
+			<soap:operation soapAction="write" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="PhoneNotExistsException">
+				<soap:fault use="literal" name="PhoneNotExistsException"/>
+			</fault>
+			<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+        
+		<operation name="GetPhoneBalance">
+			<soap:operation soapAction="read" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="PhoneNotExistsException">
+				<soap:fault use="literal" name="PhoneNotExistsException"/>
+			</fault>
+			<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+
+		<operation name="IncreasePhoneBalance">
+			<soap:operation soapAction="write" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="PhoneNotExistsException">
+				<soap:fault use="literal" name="PhoneNotExistsException"/>
+			</fault>
+			<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+			<fault name="InvalidAmountException">
+				<soap:fault use="literal" name="InvalidAmountException"/>
+			</fault>
+			<fault name="BalanceLimitExceededException">
+				<soap:fault use="literal" name="BalanceLimitExceededException"/>
+			</fault>
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+        
+		<operation name="ReceiveSMS">
+			<soap:operation soapAction="write" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="PhoneNotExistsException">
+				<soap:fault use="literal" name="PhoneNotExistsException"/>
+			</fault>
+			<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault> 
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+        
+		<operation name="SendSMS">
+			<soap:operation soapAction="write" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="PhoneNotExistsException">
+				<soap:fault use="literal" name="PhoneNotExistsException"/>
+			</fault>
+			<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault> 
+			<fault name="NotPositiveBalanceException">
+				<soap:fault use="literal" name="NotPositiveBalanceException"/>
+			</fault>
+			<fault name="InvalidStateSendSMSException">
+				<soap:fault use="literal" name="InvalidStateSendSMSException"/>
+			</fault> 
+			<fault name="InvalidAmountException">
+				<soap:fault use="literal" name="InvalidAmountException"/>
+			</fault> 
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault>
+		</operation>
+        
+		<operation name="RegisterPhone">
+			<soap:operation soapAction="write" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="InvalidPhoneTypeException">
+				<soap:fault use="literal" name="InvalidPhoneTypeException"/>
+			</fault>
+			<fault name="UnrecognisedPrefixException">
+				<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+			</fault>
+			<fault name="PhoneAlreadyExistsException">
+				<soap:fault use="literal" name="PhoneAlreadyExistsException"/>
+			</fault>
+			<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+			<fault name="CommunicationErrorException">
+				<soap:fault use="literal" name="CommunicationErrorException"/>
+			</fault> 
+			<fault name="IncompatiblePrefixException">
+				<soap:fault use="literal" name="IncompatiblePrefixException"/>
+			</fault>
+		</operation>
+		
+		<operation name="SetPhoneState">
+			<soap:operation soapAction="write" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+          	</output>
+          	<fault name="UnrecognisedPrefixException">
+          		<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault>
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+         	<fault name="InvalidStateException">
+	        	<soap:fault use="literal" name="InvalidStateException"/>
+    	    </fault>
+          	<fault name="CantChangeStateException">
+          		<soap:fault use="literal" name="CantChangeStateException"/>
+          	</fault>
+        	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+         	</fault> 	
+        </operation>
+        
+        <operation name="GetPhoneState">
+        	<soap:operation soapAction="read" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault>
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+		  	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="GetPhoneSMSReceivedMessages">
+        	<soap:operation soapAction="read" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault>
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+		  	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="GetLastMadeCommunication">
+        	<soap:operation soapAction="read" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault>
+          	
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="NoMadeCommunicationException">
+          		<soap:fault use="literal" name="NoMadeCommunicationException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+		  	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="MakeCall">
+        	<soap:operation soapAction="write" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault> 
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+          	<fault name="NotPositiveBalanceException">
+          		<soap:fault use="literal" name="NotPositiveBalanceException"/>
+          	</fault>
+          	<fault name="InvalidStateMakeVoiceException">
+          		<soap:fault use="literal" name="InvalidStateMakeVoiceException"/>
+          	</fault>
+          	<fault name="InvalidStateMakeVideoException">
+          		<soap:fault use="literal" name="InvalidStateMakeVideoException"/>
+          	</fault>
+          	<fault name="CantMakeVoiceCallException">
+          		<soap:fault use="literal" name="CantMakeVoiceCallException"/>
+          	</fault>
+          	<fault name="CantMakeVideoCallException">
+          		<soap:fault use="literal" name="CantMakeVideoCallException"/>
+          	</fault>
+          	<fault name="InvalidCallTypeException">
+          		<soap:fault use="literal" name="InvalidCallTypeException"/>
+          	</fault>
+		  	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="ReceiveCall">
+        	<soap:operation soapAction="write" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault> 
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+          	<fault name="InvalidStateReceiveVoiceException">
+          		<soap:fault use="literal" name="InvalidStateReceiveVoiceException"/>
+          	</fault>
+          	<fault name="InvalidStateReceiveVideoException">
+          		<soap:fault use="literal" name="InvalidStateReceiveVideoException"/>
+          	</fault>
+          	<fault name="CantReceiveVoiceCallException">
+          		<soap:fault use="literal" name="CantReceiveVoiceCallException"/>
+          	</fault>
+          	<fault name="CantReceiveVideoCallException">
+          		<soap:fault use="literal" name="CantReceiveVideoCallException"/>
+          	</fault>
+          	<fault name="InvalidCallTypeException">
+          		<soap:fault use="literal" name="InvalidCallTypeException"/>
+          	</fault>
+		  	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="FinishCall">
+        	<soap:operation soapAction="write" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault> 
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+          	<fault name="DurationNotValidException">
+          		<soap:fault use="literal" name="DurationNotValidException"/>
+          	</fault>
+          	<fault name="InvalidStateFinishMakingCallException">
+          		<soap:fault use="literal" name="InvalidStateFinishMakingCallException"/>
+          	</fault>
+          	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="FinishCallOnDestination">
+        	<soap:operation soapAction="write" />
+          	<input>
+          		<soap:body use="literal" />
+          	</input>
+          	<output>
+          		<soap:body use="literal" />
+        	</output>
+    	    <fault name="UnrecognisedPrefixException">
+	          	<soap:fault use="literal" name="UnrecognisedPrefixException"/>
+          	</fault> 
+          	<fault name="PhoneNotExistsException">
+          		<soap:fault use="literal" name="PhoneNotExistsException"/>
+          	</fault>
+          	<fault name="PhoneNumberNotValidException">
+          		<soap:fault use="literal" name="PhoneNumberNotValidException"/>
+          	</fault>
+          	<fault name="DurationNotValidException">
+          		<soap:fault use="literal" name="DurationNotValidException"/>
+          	</fault>
+          	<fault name="InvalidStateFinishReceivingCallException">
+          		<soap:fault use="literal" name="InvalidStateFinishReceivingCallException"/>
+          	</fault>
+          	<fault name="CommunicationErrorException">
+         		<soap:fault use="literal" name="CommunicationErrorException"/>
+        	</fault>
+        </operation>
+        
+        <operation name="RevogateCertificate">
+            <soap:operation soapAction="read" />
+            <input>
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+            <fault name="CommunicationErrorException">
+                <soap:fault use="literal" name="CommunicationErrorException"/>
+            </fault>
+        </operation>
+		
+	</binding>
+
+
+	<service name="anacom">
+		<port name="AnacomApplicationServicePort" binding="tns:AnacomApplicationServerBinding">
+			<soap:address location="http://localhost:8080/ws1-as/AnacomApplicationServer" />
+		</port>
+	</service>
+
+
+</definitions>

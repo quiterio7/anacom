@@ -1,0 +1,34 @@
+10
+
+dir
+804
+svn+ssh://sdes.rnl.ist.utl.pt/home/svn/A0211/trunk/anacom/src/test/java/anacom
+svn+ssh://sdes.rnl.ist.utl.pt/home/svn/A0211
+
+
+
+2012-05-15T22:07:40.998437Z
+790
+ist167036
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+ea197e95-ff10-4494-bef2-94a6ed14a03c
+
+replication
+dir
+
+service
+dir
+

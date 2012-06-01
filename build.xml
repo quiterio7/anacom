@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="Anacom-G0211" default="compile-all" basedir=".">
+	<description>Anacom Main Build File</description>
+	
+	<property environment="env" />
+	<!--<property name="CA_Build" file="./build-ca.xml" />-->
+	<property file="${user.home}/build.properties"/>
+	<property file="build.properties"/>
+	<!-- Main Definitions to Project Configuration -->
+	<property name="application.name"   value="anacom" />
+	<property name="javac.encoding"     value="UTF-8" />
+	<property name="java.file.encoding" value="UTF-8" />
+	<property name="devmode.mainclass"	value="anacom.presentationserver.Anacom" />
+	<property name="run.mainclass"		value="anacom.presentationserver.PresentationServer" />
+	<property name="prepare-replication.mainclass"		value="anacom.presentationserver.ReplicGenerator" />
+	<property name="es.startUp.URL" 	value="index.html"/>
+	<property name="sd.startUp.URL" 	value="remote.html"/>
+	<!-- Main directories-->
+	<property name="src.rel-dir"      value="src/main" />
+	<property name="test.src.rel-dir" value="src/test" />
+	<property name="build.rel-dir"    value="build" />
+	<property name="dist.rel-dir"     value="dist" />
+    <!-- Directories with the source (java, dml, webap/ps) -->
+ 	<property name="java.src.rel-dir"      value="${src.rel-dir}/java" />
+	<property name="java.test.src.rel-dir" value="${test.src.rel-dir}/java" />
+	<property name="dml.src.rel-dir"       value="${src.rel-dir}/dml" />
+	<property name="config.src.rel-dir"    value="${src.rel-dir}/config" />
+	<property name="webas.src.rel-dir"     value="${src.rel-dir}/webas" />
+	<property name="webps.src.rel-dir"     value="${src.rel-dir}/webps" />
+	<!-- JBoss references -->
+	<property name="jboss.temp.rel-dir" value="/tmp" />
+	<property name="db.rel-dir"         value="/tmp/db" />
+	<property name="test-db.rel-dir"    value="test-db" />
+	<!-- WSDL References -->
+	<property name="stubs.package" value="anacom.shared.stubs" />
+	<property name="stubs.ca.package" value="cacert.shared.stubs"/>
+	<property name="project.localwsdl" value="${webas.src.rel-dir}/${application.name}.wsdl" />
+	<property name="project.async.binding" value="${webas.src.rel-dir}/async.binding"/>
+	<!-- DML files -->
+	<property name="dml.filename" value="${application.name}.dml" />
+	<property name="dml.rel-file" value="${dml.src.rel-dir}/${dml.filename}" />
+	<!-- Directories with generated source -->
+	<property name="generated-src.build.rel-dir" value="${build.rel-dir}/src" />
+	<!-- Directories with the .class (used to build the wars) -->
+	<property name="classes.build.rel-dir" value="${build.rel-dir}/war/WEB-INF/classes" />
+	<!-- War distribution -->
+	<property name="war-es.target.rel-dir" value="${build.rel-dir}/war-es" />
+	<property name="war-es.filename"       value="${application.name}-es.war" />
+	<property name="dist.as.warfile" value="${dist.rel-dir}/${application.name}-as.war" />
+	<property name="dist.ps.warfile" value="${dist.rel-dir}/${application.name}-ps.war" />
+	<!-- Deploy directories -->
+	<property name="deploy.dir" value="${jboss.home}/standalone/deployments" />
+	<!-- GWT SDK -->
+	<property name="gwt.war.rel-dir" value="${build.rel-dir}/war" />
+	<property name="gwt.war.classes.rel-dir" value="${gwt.war.rel-dir}/WEB-INF/classes" />
+	<property name="gwt.war.lib.rel-dir" value="${gwt.war.rel-dir}/WEB-INF/lib" />
+	<!-- Arguments to gwt-compiler and devmode targets -->
+  	<property name="gwt.args" value="" />
+
+  	<!-- Configure path to GWT SDK -->
+  	<property name="gwt.sdk" location="${gwt.sdk.home}"/>
+	
+	<!-- Important Paths to project Build File -->
+	<path id="project.classpath">
+		<pathelement location="${classes.build.rel-dir}" />
+		<fileset dir="${gwt.sdk.home}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${jboss.home}/modules">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib_JAX-R.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${jmock.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+	<path id="ws-stubs.classpath">
+		<fileset dir="${jboss.home}/modules">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib_JAX-R.rel-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<taskdef resource="pt/ist/fenixframework/dml-ant.xml" 
+			     classpathref="project.classpath" />
+	
+	<!-- Preparing Environment -->
+	<target name="prepare">
+		<echo message="Preparing the project for build..." />
+		<mkdir dir="${classes.build.rel-dir}" />
+		<mkdir dir="${db.rel-dir}" />
+		<mkdir dir="${test-db.rel-dir}" />
+		<copy file="${dml.rel-file}" todir="${jboss.temp.rel-dir}" />
+		<copy todir="${gwt.war.rel-dir}">
+		  <fileset dir="." includes="**/*.dml"/>
+		</copy>
+	</target>
+	<!-- Generating Domain and WSDL stubs -->
+	<target name="generate-domain" depends="prepare">
+		<echo message="Generating base domain classes..." />
+		<echo message="Using: ${dml.rel-file}" />
+		<dml-domain-generator destDirectory="${java.src.rel-dir}" 
+			                  destDirectoryBase="${generated-src.build.rel-dir}">
+			<fileset file="${dml.rel-file}" />
+		</dml-domain-generator>
+	</target>
+	
+	<target name="generate-ws-stubs" depends="prepare" 
+		    description="Generate Web Service Java code from local WSDL, for the server">
+		<taskdef name="wsconsume" classname="org.jboss.ws.tools.ant.WSConsumeTask">
+			<classpath>
+				<path refid="ws-stubs.classpath" />
+			</classpath>
+		</taskdef>
+		<echo message="Executing wsconsume to generate server-side code..." />
+		<echo message="WSDL: ${project.localwsdl}" />
+		<wsconsume fork="false" verbose="true" keep="true"
+    	   package="${stubs.package}.server"
+	       wsdl="${project.localwsdl}"
+		   sourcedestdir="${generated-src.build.rel-dir}" 
+		   destdir="${classes.build.rel-dir}" />
+		<wsconsume fork="false" verbose="true" keep="true"
+     	   binding="${project.async.binding}"
+ 	       package="${stubs.package}.client"
+ 	       wsdl="${project.localwsdl}"
+ 		   sourcedestdir="${generated-src.build.rel-dir}"
+ 		   destdir="${classes.build.rel-dir}" />
+	</target>
+	
+	<target name="generate-code" depends="generate-domain, generate-ws-stubs, copy-CA-stubs">
+	    <copy todir="${generated-src.build.rel-dir}">
+	        <fileset dir="${security.rel.dir}">
+	            <include name="**/*.java"/>
+	        </fileset>
+	    </copy>
+	</target>
+	
+	<!--Compiling Domain DML and Source Code -->
+	<target name="compile-domain" depends="generate-code">
+		<echo message="Compiling sources..." />
+		<javac destdir="${classes.build.rel-dir}" 
+			   debug="true" debuglevel="lines,vars,source" 
+			   optimize="true" deprecation="true" verbose="false" 
+			   includeantruntime="false">
+			<classpath refid="project.classpath" />
+			<src>
+				<pathelement path="${generated-src.build.rel-dir}:${java.src.rel-dir}" />
+			</src>
+			<compilerarg line="" />
+		</javac>
+	</target>
+	
+	<target name="instrument-classes" depends="">
+		<echo message="Injecting ByteCode to reinitialize FenixFramework persisted objects :)" />
+		<dml-post-processor dir="${classes.build.rel-dir}">
+			<fileset file="${dml.rel-file}" />
+			<classpath refid="project.classpath" />
+		</dml-post-processor>
+	</target>
+	
+	<target name="compile-all" depends="compile-domain, instrument-classes" 
+		    description="Compiles the project">
+		<copy todir="${gwt.war.rel-dir}">
+			<fileset dir="${webps.src.rel-dir}" />
+		</copy>
+		<copy todir="${gwt.war.lib.rel-dir}">
+			<fileset dir="${lib.rel-dir}" />
+		</copy>
+	    <copy todir="${gwt.war.lib.rel-dir}" flatten="yes">
+	      <fileset dir="${gwt.sdk.home}" includes="gwt-servlet.jar" />
+	    </copy>
+		<copy todir="${gwt.war.lib.rel-dir}" flatten="yes">
+			<fileset dir="${gwt.sdk.home}" includes="gwt-servlet-deps.jar" />
+		</copy>
+	</target>
+	<!-- TESTS COMPILATION -->
+	<target name="compile-tests" depends="compile-all" 
+	    description="Compile the tests">
+		<javac destdir="${classes.build.rel-dir}" 
+		   debug="true" debuglevel="lines,vars,source"  
+		   optimize="true" deprecation="true" verbose="false" 
+		   includeantruntime="false" encoding="${javac.encoding}">
+		<classpath refid="project.classpath" />
+		<src>
+			<pathelement path="${java.test.src.rel-dir}/anacom" />
+		</src>
+		</javac>
+	</target>
+
+	<!-- Clean Tomcat database -->
+	<target name="clean-tomcat-database" depends="" description="Clean Tomcat database.">
+		<delete dir="${juddi.home}/bin/target/juddi-derby-test-db"/>
+	</target>
+	
+	<!-- Deploying Stuff -->
+	<target name="copy-web-xml" depends="" description="copy web.xml to its location">
+		<copy overwrite="true" tofile="${webas.src.rel-dir}/WEB-INF/web.xml" file="${webas.src.rel-dir}/WEB-INF/${application.name}.xml" />
+	</target>
+	
+	<target name="copy-handlers" depends="" description="Copy xml soap handlers files">
+        <copy todir="${classes.build.rel-dir}">
+            <fileset dir="${java.src.rel-dir}">
+                <include name="**/*.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+	  <target name="war-as-sd" depends="copy-web-xml, copy-handlers" description="Create the web service distribution archive">
+	    <war warfile="${dist.rel-dir}/${application.name}-as.war" webxml="${webas.src.rel-dir}/WEB-INF/web.xml">
+	      <classes dir="${classes.build.rel-dir}" />
+	      <tarfileset dir="${webas.src.rel-dir}">
+					<include name="*.wsdl" />
+	      </tarfileset>
+	      <tarfileset dir="${lib.rel-dir}" prefix="WEB-INF/lib">
+					<include name="**.jar" />
+	      </tarfileset>
+	      <tarfileset dir="${webas.src.rel-dir}" prefix="WEB-INF/classes">
+					<include name="uddi.xml"/>
+			  </tarfileset>
+			  <tarfileset dir="${lib_JAX-R.rel-dir}" prefix="WEB-INF/lib">
+				<include name="**.jar" />
+			  </tarfileset>
+	    </war>
+	  </target>
+	
+	 <target name="deploy" depends="war-as-sd" description="Deploy web service to JBoss AS">
+	 	<fail unless="jboss.home">project.jboss.home not set</fail>
+	 	<copy todir="${deploy.dir}" file="${dist.rel-dir}/${application.name}-as.war" />
+	 </target>
+	<target name="undeploy" description="Undeploy from JBoss AS">
+		<fail unless="jboss.home">project.jboss.home not set</fail>
+		<delete>
+			<fileset dir="${deploy.dir}" includes="${application.name}*"/></delete>
+	</target>
+	
+	<!-- Deployments -->
+	<target name="deploy-Operator1-Replic1" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws11"/>
+		</antcall>
+	</target>
+	<target name="deploy-Operator1-Replic2" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws12"/>
+		</antcall>
+	</target>
+	<target name="deploy-Operator1-Replic3" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws13"/>
+		</antcall>
+	</target>
+	<target name="deploy-Operator1-Replic4" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws14"/>
+		</antcall>
+	</target>
+	<target name="deploy-Operator1-Replic5" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws15"/>
+		</antcall>
+	</target>
+	<target name="deploy-Operator2" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws2"/>
+		</antcall>
+	</target>
+	<target name="deploy-Operator3" depends="" description="Deploy all Web services">
+		<antcall target="deploy">
+			<param name="application.name" value="ws3"/>
+		</antcall>
+	</target>
+	
+	<!-- Undeploying Stuff -->
+	<target name="undeploy-all" description="UnDeploy all Web services">
+		<antcall target="undeploy">
+			<param name="application.name" value="ws1"/>
+		</antcall>
+		<antcall target="undeploy">
+			<param name="application.name" value="ws12"/>
+		</antcall>
+			<antcall target="undeploy">
+				<param name="application.name" value="ws13"/>
+			</antcall>
+			<antcall target="undeploy">
+				<param name="application.name" value="ws14"/>
+			</antcall>
+			<antcall target="undeploy">
+				<param name="application.name" value="ws15"/>
+			</antcall>
+		<antcall target="undeploy">
+			<param name="application.name" value="ws2"/>
+		</antcall>
+		<antcall target="undeploy">
+			<param name="application.name" value="ws3"/>
+		</antcall>
+	</target>
+
+  <!-- Compiler Google Web Toolkit -->
+  <target name="gwt-compiler" depends="compile-all" 
+  		description="GWT compile to JavaScript (production mode)">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+      <classpath>
+        <pathelement location="${java.src.rel-dir}"/>
+        <path refid="project.classpath"/>
+      </classpath>
+      <jvmarg value="-Xmx256M"/>
+      <arg line="-war"/>
+      <arg value="${gwt.war.rel-dir}"/>
+      <arg line="${gwt.args}"/>
+      <arg value="${devmode.mainclass}"/>
+    </java>
+  </target>
+
+	<!-- Dev Mode ES + SD -->
+	<target name="gwt-devmode" depends="compile-all" >
+		<echo message="Running GWT in devmode with URL='${startUpURL}'"/>
+			<mkdir dir="${gwt.war.classes.rel-dir}" />
+			<copy todir="${gwt.war.classes.rel-dir}">
+			  <fileset dir="${classes.build.rel-dir}" includes="**/*.class"/>
+			</copy>
+			<copy todir="${gwt.war.classes.rel-dir}">
+			  <fileset dir="${java.src.rel-dir}" excludes="**/*.java"/>
+			</copy>
+			<copy todir="${gwt.war.classes.rel-dir}" file="log4j.properties" />
+			<copy todir="${gwt.war.lib.rel-dir}" flatten="yes">
+			  <fileset dir="${jboss.home}" includes="**/cxf-*.jar" />
+			</copy>
+			<java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
+			  <classpath>
+			    <path refid="project.classpath"/>
+			        <pathelement location="${java.src.rel-dir}" />
+			  </classpath>
+			  <sysproperty key="uddi.xml" value="${webas.src.rel-dir}/uddi.xml"/>
+			  <jvmarg value="-Xmx256M"/>
+			  <arg value="-startupUrl"/>
+			  <arg value="${startUpURL}"/>
+			  <arg line="-war"/>
+			  <arg value="${gwt.war.rel-dir}"/>
+			  <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+			  <arg line="${gwt.args}"/>
+			  <arg value="${devmode.mainclass}"/>
+			</java>
+		</target>
+	<target name="devmode-ES" 
+		description="Runs GWT in development mode with Software Engineering configuration">
+		<antcall target="gwt-devmode">
+			<param name="startUpURL" value="${es.startUp.URL}"/>
+		</antcall>
+	</target>
+
+	<target name="devmode-SD"
+		description="Runs GWT in development mode with Distributed Systems configuration">
+		<antcall target="gwt-devmode">
+			<param name="startUpURL" value="${sd.startUp.URL}"/>
+		</antcall>
+	</target>
+	
+	<!-- Cleaning Databases and directories -->
+	<target name="clean-all" description="Cleans the compiled classes and generated sources">
+		<delete dir="${build.rel-dir}" />
+		<delete dir="${dist.rel-dir}" />
+		<delete dir="${gwt.war.classes.rel-dir}" />
+		<delete dir="${test-db.rel-dir}" />
+		<delete dir="${db.rel-dir}" />
+		<delete dir="${dml.jboss.rel-file}" />
+	</target>
+	<target name="clean-dbs" description="Cleans all data bases in tmp folder">
+		<delete dir="${db.rel-dir}"/>
+		<delete dir="${test-db.rel-dir}"/>
+	</target>
+	<!-- DEBUGGING STuFF | Check variables on bash properties -->
+	<target name="print-var-location" description="Prints Interesting environment variables" >
+		<propertyset id="environment"> 
+			<propertyref prefix="env."/> 
+		</propertyset> 
+		<property name="env_prop" refid="environment"/>
+		<echo message="JAX_R libs >> ${lib_JAX-R.rel-dir}" />
+		<echo message="Fenix Jars >> ${lib.rel-dir}"/>
+		<echo message="JBoss Home >> ${env.JBOSS_HOME}"/>
+		<echo message="GWT Home   >> ${env.GWT_HOME}"/>
+	</target>
+	
+	<!-- Run Commands -->
+	<!-- Carefull with this target
+			To avoid pitfalls:
+				1) firstly compile the source
+				2) Deployall the Anacom Service
+				4) after those procedures, then execute target run-remote
+				
+			Explanation:
+				To run and test the services execution we don't need to compile, wscosume and deploy 
+				every time that we call this target. Those Procedures take a while unnecessarily. 
+				If you ran once compile->deploy-> .. etc; thats is enought to execute run-remote without issues 
+	-->
+  <target name="run-remote" description="Runs the program with a remote application server">
+    <java classname="${run.mainclass}" fork="false">
+      <classpath>
+	<path refid="project.classpath" />
+      </classpath>
+      <sysproperty key="server.type" value="ES+SD"/>
+      <sysproperty key="uddi.xml" value="${webas.src.rel-dir}/uddi.xml"/>
+    </java>
+  </target>
+
+	<target name="run-local" depends="compile-all" description="Runs the program with a local application server">
+    <java classname="${run.mainclass}" fork="false">
+      <classpath>
+	<path refid="project.classpath" />
+      </classpath>
+      <sysproperty key="server.type" value="ES-only"/>
+    </java>
+  </target>
+	
+  <target name="run-remote-silent" description="Runs the program with a remote application server">
+    <java classname="${run.mainclass}" fork="false">
+      <classpath>
+	<path refid="project.classpath" />
+      </classpath>
+      <sysproperty key="server.type" value="ES+SD+Silent"/>
+      <sysproperty key="uddi.xml" value="${webas.src.rel-dir}/uddi.xml"/>
+    </java>
+  </target>
+	
+  <target name="run-remote-byzantine" description="Runs the program with a remote application server">
+    <java classname="${run.mainclass}" fork="false">
+      <classpath>
+	<path refid="project.classpath" />
+      </classpath>
+      <sysproperty key="server.type" value="ES+SD+Byzantine"/>
+      <sysproperty key="uddi.xml" value="${webas.src.rel-dir}/uddi.xml"/>
+    </java>
+  </target>
+
+	
+	<!-- Test Commands -->
+	  <target name="test-ES" depends="compile-tests" description="Run the tests">
+	    <echo message="Testing all services..." />
+	    <junit>
+	      <classpath refid="project.classpath" />
+	      <formatter type="brief" usefile="false" />
+	      <test name="anacom.service.test.CreateNewOperatorServiceTest" />
+	      <test name="anacom.service.test.IncreasePhoneBalanceServiceTest" />
+	      <test name="anacom.service.test.VoiceCallServiceTest" />
+	      <test name="anacom.service.test.VideoCallServiceTest" />
+		  <test name="anacom.service.test.LastCallTest" />
+	      <test name="anacom.service.test.SendSMSServiceTest" />
+	      <test name="anacom.service.test.SMSReceivedbyPhoneServiceTest" />
+	    </junit>
+	  </target>
+	  <target name="test-SD" depends="compile-tests" description="Run the tests">
+	    <echo message="Testing all services..." />
+	    <echo message="Without Test references..." />
+	    <junit>
+	      <sysproperty key="uddi.xml" value="${webas.src.rel-dir}/uddi.xml"/>
+	      <classpath refid="project.classpath" />
+	      <formatter type="brief" usefile="false" />
+	      <test name="anacom.replication.test.GenericComparatorTestCase" />
+    	  <test name="anacom.replication.test.SilentFailureProtocolTestCase" />
+	      <test name="anacom.replication.test.ByzantineFailureProtocolTestCase" />
+	    	<test name="anacom.replication.test.PacketReplicatorTestCase" />
+	    </junit>
+	  </target>
+	
+	
+	<!-- CA Deployment -->
+	<target name="deploy-CA">
+	    <subant target="deploy">
+	      <fileset dir="." includes="build-ca.xml"/>
+	    </subant>
+	</target>
+	
+	<!-- CA Stub Hacking -->
+	<target name="wSConsume-CA">
+	        <subant target="generate-ws-stubs">
+	          <fileset dir="." includes="build-ca.xml"/>
+	        </subant>
+    </target>
+	
+	<target name="copy-CA-stubs" depends="wSConsume-CA">
+	           <copy todir="${generated-src.build.rel-dir}/cacert/shared">
+	            <fileset dir="${build.rel-dir}/cacert/src/cacert/shared">
+	                  <include name="**/*.java"/>
+	            </fileset>
+	            </copy>
+	 </target>
+	
+	
+	<!-- CA Stub Normal way -->
+	<target name="consume-CA-stubs" depends="" description="Generate Web Service client-side of CA">
+	            <taskdef name="wsconsume" classname="org.jboss.ws.tools.ant.WSConsumeTask">
+	                <classpath>
+	                <path refid="project.classpath" />
+	                </classpath>
+	            </taskdef>
+
+	            <echo message="Executing wsconsume to generate client-side code..." />
+	            <echo message="WSDL: http://localhost:8080/cacert-as/CacertApplicationServer?wsdl" />
+	            <wsconsume 
+	              fork="true"
+	              verbose="true"
+	              destdir="${classes.build.rel-dir}"
+	              sourcedestdir="${generated-src.build.rel-dir}"
+	              package="${stubs.ca.package}"
+	              keep="true"
+	              wsdllocation="http://localhost:8080/cacert-as/CacertApplicationServer?wsdl" 
+	              wsdl="http://localhost:8080/cacert-as/CacertApplicationServer?wsdl"/>
+	</target>
+	
+	<target name="gen-CA-stubs" depends="prepare" 
+	            description="Generate Web Service Java 2 WSDL">
+	        <taskdef name="wsconsume" classname="org.jboss.ws.tools.ant.WSConsumeTask">
+	            <classpath>
+	                <path refid="ws-stubs.classpath" />
+	            </classpath>
+	        </taskdef>
+	        <echo message="Executing wsconsume to generate server-side code..." />
+	        <echo message="WSDL: http://localhost:8080/cacert-as/CacertApplicationServer?wsdl" />
+	        <wsconsume fork="false" verbose="true" keep="true"
+	           package="${stubs.ca.package}"
+	           wsdl="http://localhost:8080/cacert-as/CacertApplicationServer?wsdl"
+	           sourcedestdir="${generated-src.build.rel-dir}" 
+	           destdir="${classes.build.rel-dir}" />
+	    </target>
+	</project>

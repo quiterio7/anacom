@@ -1,0 +1,157 @@
+package anacom.domain;
+
+/*
+ * Class specifications
+ */
+
+class Network
+{
+	DateTime timestamp; // used in distribution
+}
+
+class Operator
+{
+	String name;
+	String prefix;
+	int smsCost;
+	int voiceCost;
+	int videoCost;
+	int tax;
+	int bonus;
+}
+
+// Phones
+
+class Phone
+{
+	String number;
+	int balance;
+}
+
+class Phone2G extends Phone;
+class Phone3G extends Phone;
+
+// Phone States
+
+class PhoneState;
+
+class OnState extends PhoneState;
+class OffState extends PhoneState;
+class SilentState extends PhoneState;
+class OccupiedState extends PhoneState
+{
+	// The Phone is in the occupied state only when in a call with another
+	String otherParty;
+}
+class ReceivingCallState extends OccupiedState;
+class ReceivingVoiceCallState extends ReceivingCallState;
+class ReceivingVideoCallState extends ReceivingCallState;
+class MakingCallState extends OccupiedState
+{
+	long startTime; // in seconds
+}
+class MakingVoiceCallState extends MakingCallState;
+class MakingVideoCallState extends MakingCallState;
+
+// Communications
+
+class Communication
+{
+	int cost;
+	String otherParty;
+}
+
+class Call extends Communication
+{
+	int duration;
+}
+
+class Voice extends Call;
+
+class Video extends Call;
+
+class SMS extends Communication
+{
+	String message;
+}
+
+/*
+ * Relations
+ */
+
+relation NetworkHasOperators
+{
+	Network playsRole network 
+	{
+		multiplicity 1;
+	}
+	Operator playsRole operator
+	{
+		multiplicity *;
+	}
+}
+
+relation OperatorHasPhones
+{
+	Operator playsRole operator
+	{
+		multiplicity 1;
+	}
+	Phone playsRole phone
+	{
+		multiplicity *;
+	}
+}
+
+relation PhoneHasState
+{
+	Phone playsRole phone
+	{
+		multiplicity 1;
+	}
+	PhoneState playsRole state
+	{
+		multiplicity 1;
+	}
+}
+relation OccupiedStateStoresFormerState
+{
+	OccupiedState playsRole;
+	PhoneState playsRole formerState
+	{
+		multiplicity 1;
+	}
+}
+
+relation PhoneEstablishesCommunications
+{
+	Phone playsRole origin
+	{
+		multiplicity 0..1;
+	}
+	Communication playsRole establishedCalls
+	{
+		multiplicity *;	
+	}
+}
+
+relation PhoneLastMadeCommunication
+{
+	Phone playsRole;
+	Communication playsRole lastMadeCommunication
+	{
+		multiplicity 1;
+	}
+}
+
+relation PhoneReceivesCommunications
+{
+	Phone playsRole destination
+	{
+		multiplicity 0..1;
+	}
+	Communication playsRole receivedCalls
+	{
+		multiplicity *;
+	}
+}
