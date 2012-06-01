@@ -1,34 +1,0 @@
-10
-
-dir
-804
-svn+ssh://sdes.rnl.ist.utl.pt/home/svn/A0211/trunk/anacom/src/test/java/cacert
-svn+ssh://sdes.rnl.ist.utl.pt/home/svn/A0211
-
-
-
-2012-05-22T15:47:26.626902Z
-804
-ist164714
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-ea197e95-ff10-4494-bef2-94a6ed14a03c
-
-service
-dir
-
-webservice
-dir
-
